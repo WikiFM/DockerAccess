@@ -57,7 +57,7 @@ class SpecialDockerAccess extends SpecialPage {
 		$success_text = "/vnc.html";
 		# If $response starts with $success_text...
 		if (substr($response, 0, strlen($success_text)) === $success_text) {
-			$wikitext = "Your VNC virtual instance is ready. To access it, [".$virtualFactoryURL.$response.' please click here]';
+			$wikitext = "Your VNC virtual instance is ready. To access it, [".$virtualFactoryURL.$response.' please click here].';
 		} else {
 			$wikitext = "'''Internal Error!'''\n\nServer replied:\n ".$response."\nIf you believe it is a bug, please report it to [mailto:wikifm@kde.org wikifm@kde.org].";
 		}
