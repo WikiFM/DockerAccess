@@ -1,7 +1,7 @@
 <?php
 class SpecialDockerAccess extends SpecialPage {
 	function __construct() {
-		parent::__construct( 'DockerAccess' , 'autoconfirmed' );
+		parent::__construct( 'DockerAccess' , 'user' );
 // 		parent::__construct( 'DockerAccess' );
 	}
 
