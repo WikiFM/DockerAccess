@@ -7,14 +7,25 @@ class SpecialDockerAccess extends SpecialPage {
 
 	function execute( $par ) {
 	
+		$request = $this->getRequest();
+		$output = $this->getOutput();
+		$this->setHeaders();
+		
 		if (  !$this->userCanExecute( $this->getUser() )  ) {
 			$this->displayRestrictionError();
 			return;
 		}
 		
-		$request = $this->getRequest();
-		$output = $this->getOutput();
-		$this->setHeaders();
+		global $virtualFactoryImages;
+		
+		if (! ($par === "launch") ) {
+			$wikitext = "Please select an image to launch from the follwing list:\n";
+			foreach ( $virtualFactoryImages as $image => $readableName ) {
+				$wikitext .= "* <span class=\"plainlinks\">[{{fullurl:{{FULLPAGENAME}}}}/launch?image=$image $readableName]<span>\n";
+			}
+			$output->addWikiText( $wikitext );
+			return;
+		}
 		
 		# Check Image Parameter
 		$imageID = $request->getText( 'image' );
@@ -24,6 +35,12 @@ class SpecialDockerAccess extends SpecialPage {
 			return;
 		}
 		$userID = $this->getUser()->getId();
+		
+		if (!array_key_exists($imageID, $virtualFactoryImages)) {
+			$wikitext = "Image $imageID is not in the list of authorized images. Please see [[Special:DockerAccess]]";
+			$output->addWikiText( $wikitext );
+			return;
+		}
 		
 		global $virtualFactoryURL;
 		global $virtualFactoryUser;
