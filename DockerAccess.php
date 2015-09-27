@@ -14,9 +14,9 @@ if ( !defined( 'MEDIAWIKI' ) ) {
 $wgExtensionCredits['specialpage'][] = array(
 	'path' => __FILE__,
 	'name' => 'Docker Access (virtualfactory)',
-	'url' => 'https://www.wikifm.org/',
-	'author' => 'Riccardo Iaconelli, WikiFM team',
-	'descriptionmsg' => 'Mediawiki plugin for WikiFM\'s docker virtualfactory',
+	'url' => 'https://www.WikiToLearn.org/',
+	'author' => 'Riccardo Iaconelli, WikiToLearn team',
+	'descriptionmsg' => 'Mediawiki plugin for WikiToLearn\'s docker virtualfactory',
 	'version' => '0.1'
 );
 
