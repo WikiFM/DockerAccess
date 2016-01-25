@@ -15,6 +15,10 @@ class SpecialDockerAccess extends SpecialPage {
 			return;
 		}
 		
+		global $virtualFactoryURL;
+		global $virtualFactoryUser;
+		global $virtualFactoryPass;
+		
 		global $virtualFactoryImages;
 		
 		if ( $par === "token" ) {
@@ -31,7 +35,7 @@ class SpecialDockerAccess extends SpecialPage {
 			$data = json_decode($response)->data;
 			$success = $data->status;
 			if ( !$success ) {
-				$redirect = SkinTemplate::makeSpecialUrl( 'DockerAccess', "token?id=$token" );
+				$redirect = SkinTemplate::makeSpecialUrlSubpage( 'DockerAccess', "token", "id=$token" );
 				$this->getOutput()->redirect( $redirect );
 			} else {
 				if ( isset( $_SERVER['HTTPS'] ) ) {
@@ -41,10 +45,10 @@ class SpecialDockerAccess extends SpecialPage {
 					$encrypted = 0;
 					$port = $data->host_port;
                 }
-				$host = $data->hostname;
+				$host = $data->host_name;
 				$password = $data->instance_password;
 				$path = $data->instance_path;
-				$url = "http://dockers.wikifm.org/vnc.html?resize=scale&autoconnect=1&host=" . $host . "&port=" . $port . "&password=" . $password . "&path=" . $path . "&encrypted=" . $encrypted;
+				$url = "/extensions/DockerAccess/noVNC/vnc.html?resize=scale&autoconnect=1&host=" . $host . "&port=" . $port . "&password=" . $password . "&path=" . $path . "&encrypted=" . $encrypted;
 				$this->getOutput()->redirect( $url );
 			}
 		}
@@ -73,10 +77,6 @@ class SpecialDockerAccess extends SpecialPage {
 			return;
 		}
 		
-		global $virtualFactoryURL;
-		global $virtualFactoryUser;
-		global $virtualFactoryPass;
-		
 		$data = array("user" => $userID, "image" => $imageID, "enable_cuda" => 1);
 		
 		$context = stream_context_create(array(
@@ -94,7 +94,8 @@ class SpecialDockerAccess extends SpecialPage {
 		$success = 0;
 		$data = 0;
 		
-		$redirect = SkinTemplate::makeSpecialUrl( 'DockerAccess', "token?id=$token" );
+		
+		$redirect = SkinTemplate::makeSpecialUrlSubpage( 'DockerAccess', 'token', "id=$token" );
 		
 		$this->getOutput()->redirect( $redirect );
 		
