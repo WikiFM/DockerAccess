@@ -2,7 +2,6 @@
 class SpecialDockerAccess extends SpecialPage {
 	function __construct() {
 		parent::__construct( 'DockerAccess' , 'autoconfirmed' );
-// 		parent::__construct( 'DockerAccess' );
 	}
 
 	function execute( $par ) {
@@ -17,6 +16,38 @@ class SpecialDockerAccess extends SpecialPage {
 		}
 		
 		global $virtualFactoryImages;
+		
+		if ( $par === "token" ) {
+			$token = $request->getText( 'id' );
+			$success = 0;
+			$context = stream_context_create(array(
+				'http' => array(
+					'header'  => array("Authorization: Basic " . base64_encode("$virtualFactoryUser:$virtualFactoryPass"),
+								"Content-type: application/x-www-form-urlencoded"),
+					'method'  => 'POST',
+					'content' => http_build_query(array('token'=>$token))   )
+					));
+			$response = file_get_contents("$virtualFactoryURL/0.1/query", false, $context);
+			$data = json_decode($response)->data;
+			$success = $data->status;
+			if ( !$success ) {
+				$redirect = SkinTemplate::makeSpecialUrl( 'DockerAccess', "token?id=$token" );
+				$this->getOutput()->redirect( $redirect );
+			} else {
+				if ( isset( $_SERVER['HTTPS'] ) ) {
+					$encrypted = 1;
+					$port = $data->host_ssl_port;
+				} else {
+					$encrypted = 0;
+					$port = $data->host_port;
+                }
+				$host = $data->hostname;
+				$password = $data->instance_password;
+				$path = $data->instance_path;
+				$url = "http://dockers.wikifm.org/vnc.html?resize=scale&autoconnect=1&host=" . $host . "&port=" . $port . "&password=" . $password . "&path=" . $path . "&encrypted=" . $encrypted;
+				$this->getOutput()->redirect( $url );
+			}
+		}
 		
 		if (! ($par === "launch") ) {
 			$wikitext = "Please select an image to launch from the follwing list:\n";
@@ -46,22 +77,36 @@ class SpecialDockerAccess extends SpecialPage {
 		global $virtualFactoryUser;
 		global $virtualFactoryPass;
 		
+		$data = array("user" => $userID, "image" => $imageID, "enable_cuda" => 1);
+		
 		$context = stream_context_create(array(
 			'http' => array(
-				'header'  => "Authorization: Basic " . base64_encode("$virtualFactoryUser:$virtualFactoryPass")
+				'header'  => array("Authorization: Basic " . base64_encode("$virtualFactoryUser:$virtualFactoryPass"),
+							"Content-type: application/x-www-form-urlencoded"),
+				'method'  => 'POST',
+				'content' => http_build_query($data)
 			)
 		));
-		$response = file_get_contents("$virtualFactoryURL/create?user=$userID&image=$imageID", false, $context);
+		
+		$response = file_get_contents("$virtualFactoryURL/0.1/create", false, $context);
+		
+		$token = json_decode($response)->data->token;
+		$success = 0;
+		$data = 0;
+		
+		$redirect = SkinTemplate::makeSpecialUrl( 'DockerAccess', "token?id=$token" );
+		
+		$this->getOutput()->redirect( $redirect );
 		
 		
-		$success_text = "/vnc.html";
-		# If $response starts with $success_text...
-		if (substr($response, 0, strlen($success_text)) === $success_text) {
-			$wikitext = "Your VNC virtual instance is ready. To access it, [".$virtualFactoryURL.$response.' please click here].';
-		} else {
-			$wikitext = "'''Internal Error!'''\n\nServer replied:\n ".$response."\nIf you believe it is a bug, please report it to [mailto:wikifm@kde.org wikifm@kde.org].";
-		}
-		
-		$output->addWikiText( $wikitext );
+// 		$success_text = "/vnc.html";
+// 		# If $response starts with $success_text...
+// 		if (substr($response, 0, strlen($success_text)) === $success_text) {
+// 			$wikitext = "Your VNC virtual instance is ready. To access it, [".$virtualFactoryURL.$response.' please click here].';
+// 		} else {
+// 			$wikitext = "'''Internal Error!'''\n\nServer replied:\n ".$response."\nIf you believe it is a bug, please report it to [mailto:sysadmin@wikitolearn.org sysadmin@wikitolearn.org].";
+// 		}
+// 		
+// 		$output->addWikiText( $wikitext );
 	}
 }
